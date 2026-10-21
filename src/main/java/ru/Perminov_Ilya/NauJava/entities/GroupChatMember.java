@@ -15,12 +15,12 @@ public class GroupChatMember {
     private GroupChatMemberId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("chatId") // Связывает это поле с id.chatId из GroupChatMemberId
-    @JoinColumn(name = "chat_id") // nullable=false здесь уже подразумевается первичным ключом
+    @MapsId("chatId")
+    @JoinColumn(name = "chat_id")
     private GroupChat chat;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId") // Связывает это поле с id.userId из GroupChatMemberId
+    @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чаты пользователя</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Чаты пользователя</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Имя чата</th>
+        <th>Тэг чата</th>
+        <th>Тип чата</th>
+        <th>Роль в чате</th>
+        <th>Время создания</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!--/*@thymesVar id="chats" type="List<ru.Perminov_Ilya.NauJava.DTO.UserChatDto>"*/-->
+    <tr th:each="chat : ${chats}">
+        <td th:text="${chat.title}">Сборище крутых программистов</td>
+        <td th:text="${chat.tag}">coolProgrammersCommunity</td>
+        <td th:text="${chat.type}">Групповой</td>
+        <td th:text="${chat.role}">Участник</td>
+        <td th:text="${#temporals.format(chat.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2025 12:00</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
