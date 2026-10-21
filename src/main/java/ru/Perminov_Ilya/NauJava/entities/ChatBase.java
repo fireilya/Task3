@@ -3,6 +3,7 @@ package ru.Perminov_Ilya.NauJava.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ru.Perminov_Ilya.NauJava.entities.enums.ChatType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,6 +24,14 @@ public abstract class ChatBase {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
+
+    @Column(
+            name = "type",
+            insertable = false,
+            updatable = false,
+            nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChatType type;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

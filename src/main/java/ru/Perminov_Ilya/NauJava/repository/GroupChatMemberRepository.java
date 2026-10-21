@@ -1,10 +1,15 @@
 package ru.Perminov_Ilya.NauJava.repository;
 
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import ru.Perminov_Ilya.NauJava.EmbeddedIDs.GroupChatMemberId;
 import ru.Perminov_Ilya.NauJava.entities.GroupChatMember;
+import ru.Perminov_Ilya.NauJava.entities.User;
 
+import java.util.List;
 import java.util.UUID;
 
+@RepositoryRestResource
 public interface GroupChatMemberRepository extends CrudRepository<GroupChatMember, GroupChatMemberId> {
+    List<GroupChatMember> findAllByUser(User user);
 }

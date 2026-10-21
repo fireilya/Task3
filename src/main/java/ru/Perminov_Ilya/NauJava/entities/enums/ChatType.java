@@ -1,17 +1,18 @@
 package ru.Perminov_Ilya.NauJava.entities.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ChatType {
-    DIRECT(StringValues.DIRECT),
-    GROUP(StringValues.GROUP);
+    DIRECT(StringValues.DIRECT, StringValues.USER_FRIENDLY_DIRECT),
+    GROUP(StringValues.GROUP, StringValues.USER_FRIENDLY_GROUP);
 
     private final String stringValue;
+    private final String userFriendlyName;
 
-    ChatType(final String stringValue) {
+    ChatType(final String stringValue, String userFriendlyName) {
         this.stringValue = stringValue;
-    }
-
-    public String getStringValue() {
-        return stringValue;
+        this.userFriendlyName = userFriendlyName;
     }
 
     public static ChatType fromStringValue(String stringValue) {
@@ -25,5 +26,8 @@ public enum ChatType {
     public static class StringValues {
         public static final String DIRECT = "DIRECT";
         public static final String GROUP = "GROUP";
+
+        public static final String USER_FRIENDLY_DIRECT = "Личный";
+        public static final String USER_FRIENDLY_GROUP = "Групповой";
     }
 }
