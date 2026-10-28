@@ -3,6 +3,7 @@ package ru.Perminov_Ilya.NauJava.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ru.Perminov_Ilya.NauJava.entities.enums.UserRole;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -24,6 +25,10 @@ public class User {
 
     @Column(name = "password_hash", nullable = false, columnDefinition = "TEXT")
     private String passwordHash;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String name;
