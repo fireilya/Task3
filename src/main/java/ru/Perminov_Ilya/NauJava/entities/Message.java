@@ -46,7 +46,7 @@ public class Message {
     private List<Attachment> attachments;
 
     @AssertTrue(message = "Message can't reply on yourself")
-    public boolean isReplyOnYourself() {
+    public boolean isNotReplyOnYourself() {
         if (replyToMessage == null || id == null || replyToMessage.id == null) {
             return true;
         }
