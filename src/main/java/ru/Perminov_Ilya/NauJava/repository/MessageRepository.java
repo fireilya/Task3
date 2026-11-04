@@ -19,4 +19,6 @@ public interface MessageRepository extends CrudRepository<Message, UUID> {
             @Param("chatId") UUID chatId,
             @Param("search") String search
     );
+
+    List<Message> findAllByOrderBySentAtDesc();
 }

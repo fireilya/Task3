@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ошибка формирования отчёта</title>
+    <link rel="stylesheet" href="../css/report-status.css">
+</head>
+<body class="status-page">
+<main class="status-card status-card--error" aria-live="assertive">
+    <div class="error-icon" aria-hidden="true">
+        !
+    </div>
+
+    <h1>Не удалось сформировать отчёт</h1>
+
+    <p>
+        Во время формирования отчёта произошла ошибка.
+        Вы можете попробовать сформировать новый отчёт.
+    </p>
+
+    <a class="button" href="/fireblob/api/reports/new">
+        Сформировать новый отчёт
+    </a>
+
+    <p class="muted">
+        Если ошибка повторяется, попробуйте позже или обратитесь к администратору.
+    </p>
+</main>
+</body>
+</html>
