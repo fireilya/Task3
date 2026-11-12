@@ -11,8 +11,8 @@ import ru.Perminov_Ilya.NauJava.repository.ReportRepository;
 import ru.Perminov_Ilya.NauJava.repository.UserRepository;
 
 import java.security.InvalidParameterException;
+import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -20,20 +20,25 @@ import java.util.concurrent.FutureTask;
 
 @Component
 public class ReportFiller {
+
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private static final DateTimeFormatter DATE_TIME_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                    .withZone(ZoneId.systemDefault());
+    private final Clock clock;
+
+    private final DateTimeFormatter dateTimeFormatter;
 
     public ReportFiller(
             final ReportRepository reportRepository,
             final UserRepository userRepository,
-            final MessageRepository messageRepository) {
+            final MessageRepository messageRepository,
+            final Clock clock) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
+        this.clock = clock;
+        this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(clock.getZone());
     }
 
     @Transactional
@@ -42,9 +47,7 @@ public class ReportFiller {
         if (report.isEmpty()) {
             throw new InvalidParameterException("report with id " + reportId + " not found");
         }
-
         var reportEntity = report.get();
-
         if (reportEntity.getStatus() == ReportStatus.READY) {
             throw new InvalidParameterException("report with id " + reportId + " already filled");
         }
@@ -53,7 +56,6 @@ public class ReportFiller {
 
         var numberOfRegisteredUsersTask = new FutureTask<>(this::getNumberOfRegisteredUsers);
         var messageListTask = new FutureTask<>(this::getMessagesList);
-
         var numberOfRegisteredUsersThread = new Thread(numberOfRegisteredUsersTask);
         var messageListThread = new Thread(messageListTask);
 
@@ -78,10 +80,8 @@ public class ReportFiller {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
-
             numberOfRegisteredUsersTask.cancel(true);
             messageListTask.cancel(true);
-
             reportEntity.setStatus(ReportStatus.ERROR);
         } finally {
             reportRepository.save(reportEntity);
@@ -93,7 +93,6 @@ public class ReportFiller {
             ReportBlockResult messagesBlock,
             long totalTime
     ) {
-
         return "<!DOCTYPE html>" +
                 "<html lang=\"ru\">" +
                 "<head>" +
@@ -108,7 +107,7 @@ public class ReportFiller {
                 "<div>" +
                 "<h1 class=\"report-title\">Отчёт приложения</h1>" +
                 "<p class=\"report-subtitle\">Сформирован: " +
-                HtmlUtils.htmlEscape(formatInstant(Instant.now())) +
+                HtmlUtils.htmlEscape(formatInstant(Instant.now(clock))) +
                 "</p>" +
                 "</div>" +
                 "<div class=\"status-badge\">" +
@@ -140,9 +139,7 @@ public class ReportFiller {
 
     private ReportBlockResult getNumberOfRegisteredUsers() {
         long startTime = System.currentTimeMillis();
-
         long usersCount = userRepository.count();
-
         long executionTime = System.currentTimeMillis() - startTime;
 
         String sb = "<section class=\"report-block users-block\">" +
@@ -166,11 +163,8 @@ public class ReportFiller {
 
     private ReportBlockResult getMessagesList() {
         long startTime = System.currentTimeMillis();
-
         var messages = messageRepository.findAllByOrderBySentAtDesc();
-
         String tableHtml = buildMessagesTable(messages);
-
         long executionTime = System.currentTimeMillis() - startTime;
 
         int messagesCount = messages == null ? 0 : messages.size();
@@ -199,7 +193,6 @@ public class ReportFiller {
 
     private String buildMessagesTable(List<Message> messages) {
         var sb = new StringBuilder();
-
         sb.append("<table class=\"messages-table\">")
                 .append("<thead>")
                 .append("<tr>")
@@ -220,47 +213,37 @@ public class ReportFiller {
         } else {
             for (var message : messages) {
                 sb.append("<tr>");
-
                 appendCell(sb, message.getId());
-
                 appendCell(
                         sb,
                         message.getChat() == null
                                 ? null
                                 : message.getChat().getId()
                 );
-
                 appendCell(
                         sb,
                         message.getSender() == null
                                 ? null
                                 : message.getSender().getId()
                 );
-
                 appendCell(sb, message.getContent());
-
                 appendCell(sb, formatInstant(message.getSentAt()));
-
                 appendCell(sb, formatInstant(message.getEditedAt()));
-
                 appendCell(
                         sb,
                         message.getReplyToMessage() == null
                                 ? null
                                 : message.getReplyToMessage().getId()
                 );
-
                 sb.append("<td class=\"table-cell\">")
                         .append(buildAttachmentsCell(message.getAttachments()))
                         .append("</td>");
-
                 sb.append("</tr>");
             }
         }
 
         sb.append("</tbody>")
                 .append("</table>");
-
         return sb.toString();
     }
 
@@ -268,8 +251,7 @@ public class ReportFiller {
         if (instant == null) {
             return null;
         }
-
-        return DATE_TIME_FORMATTER.format(instant);
+        return dateTimeFormatter.format(instant);
     }
 
     private void appendCell(StringBuilder sb, Object value) {
@@ -286,14 +268,10 @@ public class ReportFiller {
         if (attachments == null || attachments.isEmpty()) {
             return "<span class=\"empty-cell\">-</span>";
         }
-
         var sb = new StringBuilder();
-
         sb.append("<ul class=\"attachments-list\">");
-
         for (var attachment : attachments) {
             var name = attachment == null ? null : attachment.getName();
-
             if (name == null || name.isBlank()) {
                 sb.append("<li class=\"attachment-item empty-cell\">-</li>");
             } else {
@@ -302,9 +280,7 @@ public class ReportFiller {
                         .append("</li>");
             }
         }
-
         sb.append("</ul>");
-
         return sb.toString();
     }
 }
