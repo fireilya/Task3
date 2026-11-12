@@ -8,6 +8,7 @@ import ru.Perminov_Ilya.NauJava.repository.ChatBaseRepository;
 import ru.Perminov_Ilya.NauJava.repository.MessageRepository;
 import ru.Perminov_Ilya.NauJava.repository.UserRepository;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +20,17 @@ public class MessageService implements IMessageService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ChatBaseRepository chatBaseRepository;
+    private final Clock clock;
 
     public MessageService(
             MessageRepository messageRepository,
             UserRepository userRepository,
-            ChatBaseRepository chatBaseRepository) {
+            ChatBaseRepository chatBaseRepository,
+            Clock clock) {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.chatBaseRepository = chatBaseRepository;
+        this.clock = clock;
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -34,7 +38,6 @@ public class MessageService implements IMessageService {
         var sender = userRepository
                 .findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
-
         var chat = chatBaseRepository
                 .findById(chatId)
                 .orElseThrow(() -> new RuntimeException("Chat not found"));
@@ -43,7 +46,7 @@ public class MessageService implements IMessageService {
         message.setChat(chat);
         message.setSender(sender);
         message.setContent(content);
-        message.setSentAt(Instant.now());
+        message.setSentAt(Instant.now(clock));
 
         if (attachments != null && attachments.length > 0) {
             List<Attachment> attachmentList = new ArrayList<>();

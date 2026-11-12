@@ -11,7 +11,7 @@ import ru.Perminov_Ilya.NauJava.repository.DirectChatRepository;
 import ru.Perminov_Ilya.NauJava.repository.GroupChatMemberRepository;
 import ru.Perminov_Ilya.NauJava.repository.UserRepository;
 
-import java.time.ZoneId;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -22,14 +22,17 @@ public class UserChatsController {
     private final UserRepository userRepository;
     private final GroupChatMemberRepository groupChatMemberRepository;
     private final DirectChatRepository directChatRepository;
+    private final Clock clock;
 
     public UserChatsController(
             UserRepository userRepository,
             GroupChatMemberRepository groupChatMemberRepository,
-            DirectChatRepository directChatRepository) {
+            DirectChatRepository directChatRepository,
+            Clock clock) {
         this.userRepository = userRepository;
         this.groupChatMemberRepository = groupChatMemberRepository;
         this.directChatRepository = directChatRepository;
+        this.clock = clock;
     }
 
     @GetMapping("/chats")
@@ -38,6 +41,7 @@ public class UserChatsController {
         var user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResourceNotFoundException("Requested user is not exist");
+
         directChatRepository
                 .findAllByUserAOrUserB(user.get())
                 .forEach(directChat ->
@@ -47,7 +51,7 @@ public class UserChatsController {
                                         directChat.getTag(),
                                         directChat.getType().getUserFriendlyName(),
                                         "-",
-                                        directChat.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDateTime())));
+                                        directChat.getCreatedAt().atZone(clock.getZone()).toLocalDateTime())));
 
         groupChatMemberRepository.findAllByUser(user.get())
                 .forEach(groupChatMember ->
@@ -57,7 +61,7 @@ public class UserChatsController {
                                         groupChatMember.getChat().getTag(),
                                         groupChatMember.getChat().getType().getUserFriendlyName(),
                                         groupChatMember.getRole().getHumanFriendlyName(),
-                                        groupChatMember.getChat().getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDateTime())));
+                                        groupChatMember.getChat().getCreatedAt().atZone(clock.getZone()).toLocalDateTime())));
 
         model.addAttribute("chats", answer);
         return "userChats";
